@@ -56,24 +56,17 @@ h1{font-size:clamp(18px,min(5vw,8vh),42px)}
 #tut{position:fixed;inset:0;z-index:40;background:#000b;display:none;align-items:center;justify-content:center;padding:10px}#tut .tc{background:#234;border:3px solid #ffd23f;border-radius:14px;padding:16px;max-width:460px;text-align:center}#tut h2{margin:0 0 8px;color:#ffd23f}#tut p{margin:0 0 12px;font-size:16px;line-height:1.4}
 @media (max-height:480px){#tut p{font-size:14px}#tut h2{font-size:18px}}
 
-/* ===== мультиплеер: панель ===== */
 button:disabled{opacity:.5;cursor:default}
-#mp{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(84px + env(safe-area-inset-top,0px));z-index:18;font-size:13px;display:none;color:#fff}
-#mp,#mp *{touch-action:manipulation}
-#mpT{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:18px;background:#000a;border:2px solid #ffd23f;cursor:pointer;font-weight:bold;font-size:13px;margin-left:auto;width:max-content}
-#mpDot{width:10px;height:10px;border-radius:50%;background:#e44;display:inline-block}#mpDot.wait{background:#fc2}#mpDot.on{background:#4e4}
-#mpB{display:none;margin-top:6px;background:#000c;border:2px solid #ffd23f;border-radius:10px;padding:8px;width:min(270px,calc(100vw - 24px));flex-direction:column;gap:6px;margin-left:auto}
-#mp.open #mpB{display:flex}
-#mpB .r{display:flex;gap:5px}#mpB input{flex:1;min-width:0;font-size:14px;padding:5px 7px;border-radius:6px}#mpB button{font-size:12px;padding:5px 8px;border-radius:6px}
-#mpB label{font-size:11px;color:#ffd23f}#mpN{font-size:11px;color:#9ff;min-height:14px;line-height:1.3}
 </style></head><body>
 <div id="menu"><h1>Удар голубей:<br>Атака дерьмом</h1>
 <div class="row"><input id="nick" maxlength="12" placeholder="Никнейм" value="Голубь"></div><div class="row" id="skins"></div>
 <div class="row"><select id="gq"><option value="a">Графика: авто</option><option value="l">Графика: низкая</option><option value="h">Графика: высокая</option></select><button id="bVib" class="on">📳 Вибро: вкл</button><button id="bLH">🖐 Левша: выкл</button></div>
 <div class="row"><button id="bTut">📖 Обучение</button></div>
 <div class="row"><select id="mode"><option value="yard">Операция: Улица</option><option value="school">Срыв линейки</option><option value="duel">Стрела 1v1 (Дуэль)</option><option value="hide">Поиск (Прятки)</option></select><select id="hcfg" style="display:none"><option value="p2">2 голубя / 1 человек</option><option value="h2">1 голубь / 2 человека</option></select></div>
-<div class="row"><button id="bSolo">Играть (соло)</button></div><div id="mpHint" style="color:#9ff;font-size:14px;max-width:440px"></div>
-<div id="rec" style="color:#9f9"></div><div id="stat" style="color:#fc6;min-height:20px"></div>
+<div class="row"><button id="bSolo">Одиночная игра (Соло / против Бота)</button><button id="bHost">Создать комнату (Хост)</button></div>
+<div class="row"><input id="code" maxlength="14" placeholder="ID комнаты (golub-12345)" style="width:210px" autocapitalize="off" autocomplete="off"><button id="bJoin">Присоединиться</button></div>
+<div id="lobby" style="display:none"><h2 id="lcode"></h2><button id="bCopy">Скопировать ссылку-приглашение</button><p id="lpl"></p><button id="bStart">СТАРТ</button></div>
+<div id="rec" style="color:#9f9"></div><div id="mpSt" style="font-size:15px;font-weight:bold"></div><div id="stat" style="color:#fc6;min-height:20px"></div>
 <small>ПК: WASD, Пробел/Shift, E/ЛКМ — схватить/огонь, F/ПКМ — сброс</small></div>
 <div id="hud"><div id="sc"></div><div id="tm"></div><div id="st"></div><div id="ch"></div><div id="msg"></div><div id="ov">ОПЕРАЦИЯ: СРЫВ ЛИНЕЙКИ</div><div id="aim"></div><div id="pt"></div><div id="arr"></div><div id="bars"><div id="bar"><i></i></div><div id="am"></div></div></div>
 <button id="land" style="display:none;position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:8;font-size:20px"></button><button id="mute">🔊</button><div id="end"></div><div id="rot">Поверните телефон горизонтально для полёта</div>
@@ -82,10 +75,6 @@ button:disabled{opacity:.5;cursor:default}
 <div id="inv"><button id="bHelp" style="background:#5d5">🤝 ПОМОЧЬ ДРУГУ</button><button id="bNo" style="background:#e55">❌ НЕТ</button></div><button id="cb">Отмена</button>
 <div id="touch"><div id="joy"><div id="knob"></div></div><div id="btns"><button data-a="up">ВВЕРХ ⬆️</button><button data-a="down">ВНИЗ ⬇️</button><button data-a="grab" id="bg">СХВАТИТЬ / ОГОНЬ 🦅</button><button data-a="bomb">СБРОС 💩</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<div id="mp"><div id="mpT" title="Мультиплеер (клавиша M)"><span id="mpDot"></span><span id="mpS">Отключен</span><span id="mpA">▾</span></div>
-<div id="mpB"><label>ID вашей комнаты (отправьте его другу)</label><div class="r"><input id="mpId" readonly value="…"><button id="mpCp">Копировать</button><button id="mpLk" title="Скопировать ссылку-приглашение">🔗</button></div>
-<label>ID друга</label><div class="r"><input id="mpFr" placeholder="golub-12345" maxlength="20" autocapitalize="off" autocomplete="off" spellcheck="false"><button id="mpCn">Подключиться</button></div>
-<div class="r"><button id="mpDc" style="display:none;flex:1;background:#f88">Отключить</button></div><div id="mpN"></div></div></div>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 const $=id=>document.getElementById(id),R=Math.random,isTouch='ontouchstart' in window||navigator.maxTouchPoints>0;if(isTouch)document.body.classList.add('touch');
@@ -169,20 +158,20 @@ const NETMAX=2;let peer=null,hostConn=null,connT=0,idTries=0,autoJoin=null;
 const mpEl=i=>document.getElementById(i);
 function tx(d,id){try{if(net.host){if(id){const c=net.conns[id];c&&c.open&&c.send(d)}else for(const k in net.conns){const c=net.conns[k];c&&c.open&&c.send(d)}}else hostConn&&hostConn.open&&hostConn.send(d)}catch(e){}}
 net.conn={get open(){return !!(hostConn&&hostConn.open)},send:d=>{try{hostConn.send(d)}catch(e){}}};
-function mpNote(t){mpEl('mpN').textContent=t||'';stat(t)}
-function mpToggle(o){const m=mpEl('mp'),op=o===undefined?!m.classList.contains('open'):o;m.classList.toggle('open',op);mpEl('mpA').textContent=op?'▴':'▾'}
-const mpCollapse=()=>mpToggle(false);
+function mpNote(t){stat(t)}
 function refreshMP(){const n=Object.keys(net.conns).length,linked=net.host?n>0:!!(hostConn&&hostConn.open),up=!!(peer&&!peer.destroyed&&!peer.disconnected),st=linked?'on':up?'wait':'off';
-mpEl('mpDot').className=st;mpEl('mpS').textContent=st==='on'?'В сети':st==='wait'?'Ожидание':'Отключен';mpEl('mpDc').style.display=linked?'':'none';mpEl('mpCn').disabled=linked||playing||!up;
-const b=$('bSolo');if(!net.host){b.textContent='Ждём старта от хоста…';b.disabled=true}else{b.disabled=false;b.textContent=n?'СТАРТ вдвоём 🐦🐦':'Играть (соло)'}updLobby()}
-function updLobby(){const h=$('mpHint');if(!h)return;const names=Object.keys(net.conns).map(k=>lobby[k]?esc(lobby[k].name):'друг');
-h.innerHTML=!net.host?'✅ Подключено к хосту. Ждём, пока хост нажмёт СТАРТ…':names.length?'✅ Друг в комнате: <b>'+names.join(', ')+'</b>. Выберите режим и жмите СТАРТ!':'🌐 Игра вдвоём: откройте панель «Мультиплеер» (справа вверху). Один отправляет свой ID, второй вводит его и жмёт «Подключиться».'}
+const s=$('mpSt');s.textContent=st==='on'?'🟢 В сети':st==='wait'?'🟡 Ожидание':'🔴 Отключен';
+const cl=!net.host;['bSolo','bHost','bJoin'].forEach(i=>$(i).disabled=cl);$('bStart').style.display=cl?'none':'';
+if(cl||n>0){$('lobby').style.display='block';$('lcode').textContent=cl?'Подключено к '+net.hostId:'ID комнаты: '+(peer?peer.id:'')}updLobby()}
+function updLobby(){const l=$('lpl');if(!l)return;
+if(!net.host){l.innerHTML='✅ Подключено к хосту. Ждём, пока хост нажмёт СТАРТ…';return}
+const names=Object.keys(net.conns).map(k=>lobby[k]?esc(lobby[k].name):'друг');
+l.innerHTML='Игроков: '+(1+names.length)+(names.length?'<br>Друг: <b>'+names.join(', ')+'</b>':'<br>Ждём друга… отправьте ему ID комнаты')}
 function initPeer(){if(peer)return;
 if(typeof Peer==='undefined'){mpNote('Библиотека PeerJS не загрузилась (CDN недоступен). Смените сеть и обновите страницу');refreshMP();return}
 const id='golub-'+(10000+Math.floor(R()*90000));let p;
 try{p=peer=new Peer(id,{debug:0,config:{iceServers:ICE}})}catch(e){peer=null;mpNote('Ошибка PeerJS: '+e.message);refreshMP();return}
-mpEl('mpId').value='…';
-p.on('open',pid=>{mpEl('mpId').value=pid;mpNote('Готово: отправьте свой ID другу');refreshMP();if(autoJoin){const a=autoJoin;autoJoin=null;mpEl('mpFr').value=a;connectTo(a)}});
+p.on('open',pid=>{mpNote('Готово! ID комнаты: '+pid);refreshMP();if(autoJoin){const a=autoJoin;autoJoin=null;$('code').value=a;connectTo(a)}});
 p.on('connection',onIncoming);
 p.on('disconnected',()=>{refreshMP();setTimeout(()=>{try{if(peer===p&&!p.destroyed)p.reconnect()}catch(e){}},2000)});
 p.on('close',refreshMP);
@@ -206,20 +195,21 @@ if(!net.host||hostConn){c.on('open',()=>{try{c.send({t:'full',r:'Этот игр
 c.on('open',()=>{setTimeout(()=>{if(!lobby[c.peer]&&c.open){try{c.close()}catch(e){}}},8000)});
 c.on('data',d=>onMsg(d,c.peer,c));c.on('close',()=>onLeave(c.peer,c));c.on('error',()=>onLeave(c.peer,c))}
 // второй игрок заходит в уже идущую игру хоста (соло -> совместный режим)
-function lateJoin(id){if(!H||H.over||mode==='hide')return false;
+function lateJoin(id){if(!H||H.over)return false;
 if(mode==='duel'){delete H.players.bot;for(const q of Object.values(H.players)){q.sc=0;q.hp=100;q.dead=0;q.ammo=8}}
-const p=H.players[id]=newP(id,lobby[id].name,lobby[id].skin);spawn(p,1);return true}
+const p=H.players[id]=newP(id,lobby[id].name,lobby[id].skin);spawn(p,1);
+if(mode==='hide'){H.npcs.forEach(n=>n.hum=0);p.role=1;p.x=(R()-.5)*30;p.z=(R()-.5)*50;p.y=.65;p.yaw=R()*6;H.ev.push(['tp',p.id,p.x,p.y,p.z,p.yaw])}return true}
 function onMsg(d,id,c){if(!d||typeof d!=='object')return;
 if(d.t==='hello'&&net.host&&c){const known=!!net.conns[id];
 if(!known&&Object.keys(net.conns).length>=NETMAX-1){try{c.send({t:'full',r:'В комнате уже двое'})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},400);return}
 lobby[id]={name:String(d.name||'Гость').slice(0,12),skin:d.skin|0};
-if(playing&&!known&&!lateJoin(id)){delete lobby[id];try{c.send({t:'full',r:'В этом режиме нельзя подключиться посреди раунда'})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},400);return}
+if(playing&&!known&&!lateJoin(id)){delete lobby[id];try{c.send({t:'full',r:'Раунд уже закончился, начните новый'})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},400);return}
 net.conns[id]=c;try{c.send({t:'hi'});if(playing)c.send({t:'start',m:mode})}catch(e){}mpNote('Друг подключился: '+lobby[id].name);refreshMP()}
 else if(d.t==='hi'&&!net.host){mpNote('Подключено! Ждём старта хоста…');updLobby()}
 else if(d.t==='full'){mpNote(d.r||'Комната занята');if(!net.host&&hostConn){const h=hostConn;onLeave(id,h);try{h.close()}catch(e){}}}
 else if(d.t==='s'&&net.host&&H&&H.players[id]){const p=H.players[id];p.x=+d.x;p.y=+d.y;p.z=+d.z;p.yaw=+d.yaw;p.land=d.l|0}
 else if(d.t==='a'&&net.host&&H&&H.players[id])act(H.players[id],d.a);
-else if(d.t==='start'&&!net.host&&!playing&&['yard','school','duel','hide'].includes(d.m)){mode=d.m;lobby={};lobby[net.id]={name:nick(),skin};mpCollapse();startGame();refreshMP()}
+else if(d.t==='start'&&!net.host&&!playing&&['yard','school','duel','hide'].includes(d.m)){mode=d.m;lobby={};lobby[net.id]={name:nick(),skin};startGame();refreshMP()}
 else if(d.t==='w'&&!net.host)applySnap(d.s)}
 function onLeave(id,c){
 if(net.host){if(!net.conns[id]||(c&&net.conns[id]!==c))return;delete net.conns[id];delete lobby[id];if(H)delete H.players[id];
@@ -230,16 +220,13 @@ if(playing){stat('Связь с хостом потеряна');msg('Хост о
 net.host=true;net.id='h';net.hostId=null;lobby={};mpNote('Соединение с хостом закрыто')}
 refreshMP()}
 function copyTxt(t,ok){if(!t||t==='…')return;(navigator.clipboard&&window.isSecureContext?navigator.clipboard.writeText(t):Promise.reject()).then(()=>mpNote(ok),()=>prompt('Скопируйте:',t))}
-mpEl('mpT').onclick=()=>mpToggle();
-mpEl('mpCp').onclick=()=>copyTxt(mpEl('mpId').value,'ID скопирован');
-mpEl('mpLk').onclick=()=>copyTxt(location.origin+location.pathname+'?room='+mpEl('mpId').value,'Ссылка-приглашение скопирована');
-mpEl('mpCn').onclick=()=>connectTo(mpEl('mpFr').value);
-mpEl('mpFr').addEventListener('keydown',e=>{if(e.key==='Enter')connectTo(mpEl('mpFr').value)});
-mpEl('mpDc').onclick=()=>{if(net.host){Object.keys(net.conns).forEach(k=>{const c=net.conns[k];onLeave(k,c);try{c.close()}catch(e){}})}else{const c=hostConn;if(playing){location.href=location.pathname;return}onLeave(net.hostId,c);try{c&&c.close()}catch(e){}}};
-addEventListener('keydown',e=>{if(e.code==='KeyM'&&!(e.target&&e.target.tagName==='INPUT')&&mpEl('mp').style.display==='block')mpToggle()});
-function startMP(){mpEl('mp').style.display='block';initPeer();refreshMP()}
-$('bSolo').onclick=()=>{if(!net.host)return;fs();mode=$('mode').value;net.id='h';const old=lobby;lobby={h:{name:nick(),skin}};for(const k in net.conns)lobby[k]=old[k]||{name:'Друг',skin:0};
-if(Object.keys(net.conns).length)tx({t:'start',m:mode});mpCollapse();startGame();refreshMP()};
+function startMP(){initPeer();refreshMP()}
+function startHost(){if(!net.host)return;fs();mode=$('mode').value;net.id='h';const old=lobby;lobby={h:{name:nick(),skin}};for(const k in net.conns)lobby[k]=old[k]||{name:'Друг',skin:0};
+if(Object.keys(net.conns).length)tx({t:'start',m:mode});startGame();refreshMP()}
+$('bSolo').onclick=$('bStart').onclick=startHost;
+$('bHost').onclick=()=>{if(!net.host)return;if(!peer||!peer.open){mpNote('Ждём подключения к серверу PeerJS…');return}mode=$('mode').value;$('lobby').style.display='block';$('lcode').textContent='ID комнаты: '+peer.id;refreshMP()};
+$('bCopy').onclick=()=>copyTxt(location.origin+location.pathname+'?room='+(peer?peer.id:''),'Ссылка-приглашение скопирована');
+$('bJoin').onclick=()=>{let v=$('code').value.trim().toLowerCase();if(/^\d{5}$/.test(v))v='golub-'+v;connectTo(v)};
 {const q=new URLSearchParams(location.search).get('room');if(q&&/^golub-\d{5}$/i.test(q.trim()))autoJoin=q.trim().toLowerCase()}
 // ---- street map ----
 function street(){block(14,22,130,-52,0,'#c9b89a');block(14,22,130,52,0,'#b9c3c9');block(118,24,12,0,-58,'#d6c9a8');block(118,20,12,0,58,'#c0b0a0');
